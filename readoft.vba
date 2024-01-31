@@ -54,7 +54,7 @@ Sub CopyTemplateContent(sourceMail As Outlook.MailItem, destinationMail As Outlo
     Dim destinationWordDoc As Object
     Dim wdPasteDefault As Integer
 
-    ' Word constants
+    ' Word constants (late binding)
     Const wdPasteDefaultConst As Integer = 0 ' Use wdPasteDefault constant value if Word is not referenced
 
     ' Get the Word editor for both source and destination mails
