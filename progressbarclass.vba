@@ -1,28 +1,41 @@
 Option Explicit
 
-Public WithEvents ProgressBarForm As UserForm
+Public WithEvents xlApp As Object
+Public WithEvents xlWB As Object
+Public WithEvents xlSheet As Object
 
 Public Sub InitializeProgressBar()
-    Set ProgressBarForm = VBA.UserForms.Add("Forms.UserForm1")
-    ProgressBarForm.Show
-    DoEvents
+    Set xlApp = CreateObject("Excel.Application")
+    Set xlWB = xlApp.Workbooks.Add
+    Set xlSheet = xlWB.Sheets(1)
+    
+    ' Add a progress bar to the Excel sheet
+    xlSheet.Shapes.AddFormControl(xlDialogButtonControl, Left:=10, Top:=10, Width:=150, Height:=15).Select
+    xlApp.VBE.ActiveWindow.Visible = False
+    xlApp.VBE.ActiveWindow.Visible = True
 End Sub
 
 Public Sub UpdateProgressBar(currentStep As Integer, totalSteps As Integer)
-    If Not ProgressBarForm Is Nothing Then
-        Dim progressPercentage As Integer
+    If Not xlSheet Is Nothing Then
+        Dim progressBar As Shape
+        Set progressBar = xlSheet.Shapes("Button 1") ' Assuming the progress bar is the first button control added
+
         If currentStep <= totalSteps Then
+            Dim progressPercentage As Integer
             progressPercentage = Int((currentStep / totalSteps) * 100)
-            ProgressBarForm.Controls("Label1").Caption = "Exporting emails to Excel: " & progressPercentage & "% complete"
-            DoEvents
+            progressBar.ControlFormat.Value = progressPercentage
+            xlApp.VBE.ActiveWindow.Visible = False
+            xlApp.VBE.ActiveWindow.Visible = True
         End If
     End If
 End Sub
 
 Public Sub HideProgressBar()
-    If Not ProgressBarForm Is Nothing Then
-        ProgressBarForm.Hide
-        Unload ProgressBarForm
-        Set ProgressBarForm = Nothing
+    If Not xlApp Is Nothing Then
+        xlWB.Close False
+        xlApp.Quit
+        Set xlSheet = Nothing
+        Set xlWB = Nothing
+        Set xlApp = Nothing
     End If
 End Sub
