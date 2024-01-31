@@ -14,24 +14,24 @@ Sub ExportEmailsToExcel()
     Dim totalEmails As Integer
     Dim exportedEmails As Integer
     Dim mailItem As Outlook.MailItem
-    Dim excelHandler As ProgressBarClass
-    Set excelHandler = New ProgressBarClass
-
-    ' Prompt the user for date range and keyword
-    exportStartDate = InputBox("Enter the start date for the export (MM/DD/YYYY):", "Start Date")
-    exportEndDate = InputBox("Enter the end date for the export (MM/DD/YYYY):", "End Date")
-    filterKeyword = InputBox("Enter the keyword to filter emails (e.g., INC):", "Filter Keyword")
-
+    
     ' Prompt the user to select the folder
     Set olApp = Outlook.Application
     Set olNamespace = olApp.GetNamespace("MAPI")
+    On Error Resume Next
     Set olFolder = olApp.Session.PickFolder
+    On Error GoTo 0
 
     ' Check if a folder is selected
     If olFolder Is Nothing Then
         MsgBox "No folder selected. Export canceled.", vbExclamation
         Exit Sub
     End If
+
+    ' Prompt the user for date range and keyword
+    exportStartDate = InputBox("Enter the start date for the export (MM/DD/YYYY):", "Start Date")
+    exportEndDate = InputBox("Enter the end date for the export (MM/DD/YYYY):", "End Date")
+    filterKeyword = InputBox("Enter the keyword to filter emails (e.g., INC):", "Filter Keyword")
 
     ' Count the total number of eligible emails
     totalEmails = 0
@@ -44,13 +44,10 @@ Sub ExportEmailsToExcel()
         End If
     Next olItem
 
-    ' Initialize Excel
-    excelHandler.InitializeExcel
-
     ' Create Excel application and workbook
-    Set xlApp = excelHandler.xlApp
-    Set xlWB = excelHandler.xlWB
-    Set xlSheet = excelHandler.xlSheet
+    Set xlApp = CreateObject("Excel.Application")
+    Set xlWB = xlApp.Workbooks.Add
+    Set xlSheet = xlWB.Sheets(1)
 
     ' Set column headers in Excel
     xlSheet.Cells(1, 1).Value = "Sender Email"
@@ -95,9 +92,6 @@ Sub ExportEmailsToExcel()
     Set olFolder = Nothing
     Set olNamespace = Nothing
     Set olApp = Nothing
-
-    ' Hide Excel
-    excelHandler.HideExcel
 
     MsgBox "Export completed successfully!", vbInformation
 End Sub
