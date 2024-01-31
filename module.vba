@@ -96,4 +96,10 @@ Sub ExportEmailsToExcelWithProgressBar()
     Set olItem = Nothing
     Set olFolder = Nothing
     Set olNamespace = Nothing
-    Set olApp
+    Set olApp = Nothing
+    
+    ' Hide the progress bar
+    progressBarForm.HideProgressBar
+    
+    MsgBox "Export completed successfully!", vbInformation
+End Sub
