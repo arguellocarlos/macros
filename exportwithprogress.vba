@@ -13,30 +13,39 @@ Sub ExportEmailsToExcelWithProgressBar()
     Dim filterKeyword As String
     Dim totalEmails As Integer
     Dim exportedEmails As Integer
+    Dim mailItem As Outlook.MailItem
+    Dim progressBar As ProgressBarClass
+    Set progressBar = New ProgressBarClass
     
     ' Prompt the user for date range and keyword
     exportStartDate = InputBox("Enter the start date for the export (MM/DD/YYYY):", "Start Date")
     exportEndDate = InputBox("Enter the end date for the export (MM/DD/YYYY):", "End Date")
     filterKeyword = InputBox("Enter the keyword to filter emails (e.g., INC):", "Filter Keyword")
     
-    ' Create Outlook and Excel objects
+    ' Prompt the user to select the folder
     Set olApp = Outlook.Application
     Set olNamespace = olApp.GetNamespace("MAPI")
+    Set olFolder = olApp.Session.PickFolder
     
-    ' Specify the folder to export (change "Inbox" to your desired folder)
-    Set olFolder = olNamespace.GetDefaultFolder(olFolderInbox)
+    ' Check if a folder is selected
+    If olFolder Is Nothing Then
+        MsgBox "No folder selected. Export canceled.", vbExclamation
+        Exit Sub
+    End If
     
     ' Count the total number of eligible emails
     totalEmails = 0
     For Each olItem In olFolder.Items
         If TypeOf olItem Is Outlook.MailItem Then
-            Dim mailItem As Outlook.MailItem
             Set mailItem = olItem
             If mailItem.ReceivedTime >= exportStartDate And mailItem.ReceivedTime <= exportEndDate And InStr(1, mailItem.Subject, filterKeyword, vbTextCompare) > 0 Then
                 totalEmails = totalEmails + 1
             End If
         End If
     Next olItem
+    
+    ' Initialize the progress bar
+    progressBar.InitializeProgressBar
     
     ' Create Excel application and workbook
     Set xlApp = CreateObject("Excel.Application")
@@ -49,16 +58,12 @@ Sub ExportEmailsToExcelWithProgressBar()
     xlSheet.Cells(1, 3).Value = "Received Date"
     xlSheet.Cells(1, 4).Value = "Subject"
     
-    ' Display the progress bar in the status bar
-    Application.StatusBar = "Exporting emails to Excel: 0% complete"
-    
     ' Loop through the emails in the specified folder
     Dim rowNum As Integer
     rowNum = 2 ' Start from row 2 to leave space for headers
     
     For Each olItem In olFolder.Items
         If TypeOf olItem Is Outlook.MailItem Then
-            Dim mailItem As Outlook.MailItem
             Set mailItem = olItem
             
             ' Check if the email meets the criteria
@@ -72,8 +77,8 @@ Sub ExportEmailsToExcelWithProgressBar()
                 rowNum = rowNum + 1
                 exportedEmails = exportedEmails + 1
                 
-                ' Update the progress bar in the status bar
-                Application.StatusBar = "Exporting emails to Excel: " & Int((exportedEmails / totalEmails) * 100) & "% complete"
+                ' Update the progress bar
+                progressBar.UpdateProgressBar exportedEmails, totalEmails
             End If
         End If
     Next olItem
@@ -94,8 +99,8 @@ Sub ExportEmailsToExcelWithProgressBar()
     Set olNamespace = Nothing
     Set olApp = Nothing
     
-    ' Clear the status bar
-    Application.StatusBar = False
+    ' Hide the progress bar
+    progressBar.HideProgressBar
     
     MsgBox "Export completed successfully!", vbInformation
 End Sub
