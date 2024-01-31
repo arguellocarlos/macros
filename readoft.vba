@@ -8,9 +8,7 @@ Sub ImportTemplate()
     Set objInspector = objMail.GetInspector
 
     With objTemplate
-        .GetInspector.Display
         .HTMLBody = Replace(.HTMLBody, "cid:", "file:///" & .Parent.Path & "/")
         objInspector.WordEditor.Range.FormattedText = .GetInspector.WordEditor.Range.FormattedText
-        .Close olDiscard
     End With
 End Sub
