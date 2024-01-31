@@ -50,8 +50,12 @@ End Sub
 
 Sub CopyTemplateContent(sourceMail As Outlook.MailItem, destinationMail As Outlook.MailItem)
     ' Copy the content from the source template to the destination mail item
-    Dim sourceWordDoc As Word.Document
-    Dim destinationWordDoc As Word.Document
+    Dim sourceWordDoc As Object
+    Dim destinationWordDoc As Object
+    Dim wdPasteDefault As Integer
+
+    ' Word constants
+    Const wdPasteDefaultConst As Integer = 0 ' Use wdPasteDefault constant value if Word is not referenced
 
     ' Get the Word editor for both source and destination mails
     Set sourceWordDoc = sourceMail.GetInspector.WordEditor
@@ -59,7 +63,7 @@ Sub CopyTemplateContent(sourceMail As Outlook.MailItem, destinationMail As Outlo
 
     ' Copy content and formatting
     sourceWordDoc.Range.Copy
-    destinationWordDoc.Range.PasteAndFormat wdPasteDefault
+    destinationWordDoc.Range.PasteSpecial Format:="HTML", Link:=False, Placement:=wdPasteDefaultConst
 
     ' Clean up
     Set sourceWordDoc = Nothing
