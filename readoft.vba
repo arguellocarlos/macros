@@ -50,8 +50,8 @@ End Sub
 
 Sub CopyTemplateContent(sourceMail As Outlook.MailItem, destinationMail As Outlook.MailItem)
     ' Copy the content from the source template to the destination mail item
-    Dim sourceWordDoc As Object
-    Dim destinationWordDoc As Object
+    Dim sourceWordDoc As Word.Document
+    Dim destinationWordDoc As Word.Document
 
     ' Get the Word editor for both source and destination mails
     Set sourceWordDoc = sourceMail.GetInspector.WordEditor
