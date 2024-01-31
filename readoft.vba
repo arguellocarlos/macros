@@ -1,50 +1,67 @@
-Sub InsertTemplateContent()
-    Dim templateFilePath As String
-    Dim templateContent As String
-    Dim currentItem As MailItem
-    
-    ' Set the path to your Outlook template file
-    templateFilePath = "C:\Path\To\Your\Template.oft"
-    
-    ' Check if a mail item is currently selected
-    If Application.ActiveExplorer.Selection.Count = 1 Then
-        If TypeOf Application.ActiveExplorer.Selection.Item(1) Is MailItem Then
-            Set currentItem = Application.ActiveExplorer.Selection.Item(1)
-        Else
-            MsgBox "Please select an email before running this macro.", vbExclamation
-            Exit Sub
+Option Explicit
+
+Sub InsertTemplateIntoEmail()
+    Dim olApp As Outlook.Application
+    Dim olInspector As Outlook.Inspector
+    Dim olMail As Outlook.MailItem
+    Dim olTemplate As Outlook.MailItem
+    Dim templatePath As String
+
+    ' Prompt the user to select an Outlook template (.oft file)
+    templatePath = Application.GetNamespace("MAPI").GetDefaultFolder(olFolderTemplates).FolderPath
+    templatePath = Application.GetNamespace("MAPI").PickFolder.Items.Item("Outlook Template").FolderPath
+    If templatePath = "" Then
+        MsgBox "No template selected. Operation canceled.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Create a new Outlook Application
+    Set olApp = CreateObject("Outlook.Application")
+
+    ' Create a new mail item (you can use the active item if desired)
+    Set olInspector = olApp.ActiveInspector
+    If Not olInspector Is Nothing Then
+        If olInspector.CurrentItem.Class = olMail Then
+            Set olMail = olInspector.CurrentItem
         End If
-    Else
-        ' If no mail item is selected, create a new mail item
-        Set currentItem = Application.CreateItem(olMailItem)
     End If
-    
-    ' Check if the template file exists
-    If Dir(templateFilePath) <> "" Then
-        ' Read the content of the template file
-        templateContent = ReadFileContent(templateFilePath)
-        
-        ' Insert the template content into the current message
-        currentItem.HTMLBody = templateContent & currentItem.HTMLBody
-    Else
-        MsgBox "Template file not found.", vbExclamation
+
+    ' Check if a mail item is selected
+    If olMail Is Nothing Then
+        MsgBox "No mail item selected. Operation canceled.", vbExclamation
+        Set olApp = Nothing
+        Exit Sub
     End If
+
+    ' Open the template
+    Set olTemplate = Application.CreateItemFromTemplate(templatePath)
+
+    ' Copy the content from the template to the current/new email
+    CopyTemplateContent olTemplate, olMail
+
+    ' Clean up
+    Set olTemplate = Nothing
+    Set olMail = Nothing
+    Set olInspector = Nothing
+    Set olApp = Nothing
+
+    MsgBox "Template inserted successfully!", vbInformation
 End Sub
 
-Function ReadFileContent(filePath As String) As String
-    Dim fileNumber As Integer
-    Dim content As String
-    
-    ' Open the file for reading
-    fileNumber = FreeFile
-    Open filePath For Input As fileNumber
-    
-    ' Read the content of the file
-    content = Input$(LOF(fileNumber), fileNumber)
-    
-    ' Close the file
-    Close fileNumber
-    
-    ' Return the file content
-    ReadFileContent = content
-End Function
+Sub CopyTemplateContent(sourceMail As Outlook.MailItem, destinationMail As Outlook.MailItem)
+    ' Copy the content from the source template to the destination mail item
+    Dim sourceWordDoc As Object
+    Dim destinationWordDoc As Object
+
+    ' Get the Word editor for both source and destination mails
+    Set sourceWordDoc = sourceMail.GetInspector.WordEditor
+    Set destinationWordDoc = destinationMail.GetInspector.WordEditor
+
+    ' Copy content and formatting
+    sourceWordDoc.Range.Copy
+    destinationWordDoc.Range.PasteAndFormat wdPasteDefault
+
+    ' Clean up
+    Set sourceWordDoc = Nothing
+    Set destinationWordDoc = Nothing
+End Sub
