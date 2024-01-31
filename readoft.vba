@@ -3,7 +3,7 @@ Sub ImportTemplate()
     Dim objTemplate As Outlook.MailItem
     Dim objInspector As Outlook.Inspector
 
-    Set objMail = Application.CreateItem(olMailItem)
+    Set objMail = Application.ActiveInspector.CurrentItem
     Set objTemplate = Application.CreateItemFromTemplate("C:\path\to\template.oft")
     Set objInspector = objMail.GetInspector
 
@@ -13,6 +13,4 @@ Sub ImportTemplate()
         objInspector.WordEditor.Range.FormattedText = .GetInspector.WordEditor.Range.FormattedText
         .Close olDiscard
     End With
-
-    objMail.Display
 End Sub
