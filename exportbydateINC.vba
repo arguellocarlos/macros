@@ -13,6 +13,7 @@ Sub ExportEmailsToExcelWithProgressBar()
     Dim filterKeyword As String
     Dim totalEmails As Integer
     Dim exportedEmails As Integer
+    Dim mailItem As Outlook.MailItem ' Declare mailItem outside the loop
     
     ' Prompt the user for date range and keyword
     exportStartDate = InputBox("Enter the start date for the export (MM/DD/YYYY):", "Start Date")
@@ -34,8 +35,7 @@ Sub ExportEmailsToExcelWithProgressBar()
     totalEmails = 0
     For Each olItem In olFolder.Items
         If TypeOf olItem Is Outlook.MailItem Then
-            Dim mailItem As Outlook.MailItem
-            Set mailItem = olItem
+            Set mailItem = olItem ' Set mailItem within the loop
             If mailItem.ReceivedTime >= exportStartDate And mailItem.ReceivedTime <= exportEndDate And InStr(1, mailItem.Subject, filterKeyword, vbTextCompare) > 0 Then
                 totalEmails = totalEmails + 1
             End If
@@ -62,8 +62,7 @@ Sub ExportEmailsToExcelWithProgressBar()
     
     For Each olItem In olFolder.Items
         If TypeOf olItem Is Outlook.MailItem Then
-            Dim mailItem As Outlook.MailItem
-            Set mailItem = olItem
+            Set mailItem = olItem ' Set mailItem within the loop
             
             ' Check if the email meets the criteria
             If mailItem.ReceivedTime >= exportStartDate And mailItem.ReceivedTime <= exportEndDate And InStr(1, mailItem.Subject, filterKeyword, vbTextCompare) > 0 Then
