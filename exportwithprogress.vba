@@ -19,16 +19,12 @@ Sub ExportEmailsToExcelWithProgressBar()
     exportEndDate = InputBox("Enter the end date for the export (MM/DD/YYYY):", "End Date")
     filterKeyword = InputBox("Enter the keyword to filter emails (e.g., INC):", "Filter Keyword")
     
-    ' Prompt the user to select the folder
+    ' Create Outlook and Excel objects
     Set olApp = Outlook.Application
     Set olNamespace = olApp.GetNamespace("MAPI")
-    Set olFolder = olApp.Session.PickFolder
     
-    ' Check if a folder is selected
-    If olFolder Is Nothing Then
-        MsgBox "No folder selected. Export canceled.", vbExclamation
-        Exit Sub
-    End If
+    ' Specify the folder to export (change "Inbox" to your desired folder)
+    Set olFolder = olNamespace.GetDefaultFolder(olFolderInbox)
     
     ' Count the total number of eligible emails
     totalEmails = 0
